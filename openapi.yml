@@ -1,0 +1,156 @@
+openapi: 3.0.3
+
+info:
+  title: Match
+  version: 0.0.1
+
+tags:
+  - name: partners
+    description: Performs operations using the partners' information.
+
+paths:
+  /partners/match:
+    post:
+      tags:
+        - partners
+      summary: Finds the partners that best match the customer's request.
+      description: You must pass the material's id to the array of materials.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                materials:
+                  type: array
+                  items:
+                    type: integer
+                address:
+                  type: object
+                  properties:
+                    lat:
+                      type: number
+                      format: float
+                    long:
+                      type: number
+                      format: float
+                square_meters:
+                  type: integer
+                phone_number:
+                  type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PartnerResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /partners/id:
+    get:
+      tags:
+        - partners
+      summary: Returns data about a partner.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            required: true
+            description: The id of the partner.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartnerResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+components:
+  responses:
+    BadRequest:
+      description: A bad request from the user occurred.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            bad_request:
+              value:
+                error: bad_request
+    NotFound:
+      description: The resource that the user was looking for was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            not_found:
+              value:
+                error: not_found
+    InternalServerError:
+      description: An unrecoverable error has occurred.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            internal_server_error:
+              value:
+                error: internal_server_error
+  schemas:
+    PartnerResponse:
+      description: Contains the partner's data.
+      type: object
+      properties:
+        id:
+          type: integer
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              description:
+                type: string
+        materials:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              description:
+                type: string
+        address:
+          type: object
+          properties:
+            lat:
+              type: number
+              format: float
+            long:
+              type: number
+              format: float
+        radius:
+          type: integer
+        rating:
+          type: integer
+    ErrorResponse:
+      description: Contains the error response.
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string

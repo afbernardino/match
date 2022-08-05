@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    restart: on-failure
+    environment:
+      - APP_PORT=8080
+      - PSQL_HOST=postgresql
+      - PSQL_PORT=5432
+      - PSQL_USER=root
+      - PSQL_PASSWORD=password
+      - PSQL_DB_NAME=match
+    depends_on:
+      - postgresql
+    ports:
+      - "8080:8080"
+
+  postgresql:
+    image: postgres:14.4-alpine
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=match
+    volumes:
+      - ./scripts/db:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"
